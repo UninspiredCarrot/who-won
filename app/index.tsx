@@ -5,70 +5,62 @@ import { SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 
+class Point {
+  number: number;
+  point: boolean;
+  constructor(number = 0, point = false) {
+    this.number = number;
+    this.point = point;
+  }
+}
+    // if (this.near >= 30 || this.far >= 30 || 
+    //   (this.near >= 21 && Math.abs(this.near - this.far) >= 2) || 
+    //   (this.far >= 21 && Math.abs(this.near - this.far) >= 2)) {
+    //     this.near = 0;
+    //     this.far = 0;
+
+    //   }
 class Score {
-  far: number;
-  near: number;
-  winner: string;
-  constructor(near = 0, far = 0, winner = "") {
+  far: Point;
+  near: Point;
+  constructor(near = new Point(0, true), far = new Point(0, false)) {
     this.near = near;
     this.far = far;
-    this.winner = winner;
   }
 
-  update(winner: string) {
-    if (winner === "near") {
-      this.near += 1;
-    } else if (winner === "far") {
-      this.far += 1;
-    }
-    this.winner = winner;
+  serverScore() {
+    return this.near.point ? this.near.number : this.far.number;
   }
 
-  render(nearOrFar: string, leftOrRight: string) {
-    let serveScore: number;
-    if (this.winner === "near") {
-      serveScore = this.near;
-    } else {
-      serveScore = this.far;
-    }
-    if (nearOrFar === "far") {
-      if (leftOrRight === "left") {
-        if (serveScore % 2 === 0) {
-          return (
-            <Text style={styles.number}>
-              {this.far}
-            </Text>
-          );
-        }
-      } else if (leftOrRight === "right") {
-        if (serveScore % 2 === 1) {
-          return (
-            <Text style={styles.number}>
-              {this.far}
-            </Text>
-          );
-        }
-      }
-    } else if (nearOrFar === "near") {
-      if (leftOrRight === "right") {
-        if (serveScore % 2 === 0) {
-          return (
-            <Text style={styles.number}>
-              {this.near}
-            </Text>
-          );
-        }
-      } else if (leftOrRight === "left") {
-        if (serveScore % 2 === 1) {
-          return (
-            <Text style={styles.number}>
-              {this.near}
-            </Text>
-          );
-        }
-      }
-    }
+  update(nearOrFar: "near" | "far") {
+    const winner = nearOrFar === "near" ? this.near : this.far;
+    const loser = nearOrFar === "near" ? this.far : this.near;
 
+    winner.number += 1;
+    winner.point = true;
+    loser.point = false;
+  }
+
+  render(nearOrFar: "near" | "far", leftOrRight: "left" | "right") {
+    const isNear = nearOrFar === "near";
+    const isEvenScore = this.serverScore() % 2 === 0;
+  
+    const showScore =
+      (isNear && leftOrRight === (isEvenScore ? "right" : "left")) ||
+      (!isNear && leftOrRight === (isEvenScore ? "left" : "right"));
+  
+    if (showScore) {
+      const scoreNumber = isNear ? this.near.number : this.far.number;
+      const showAsterisk = (isNear && this.near.point) || (!isNear && this.far.point);
+  
+      return (
+        <Text style={styles.number}>
+          {scoreNumber}
+          {showAsterisk ? "*" : ""}
+        </Text>
+      );
+    }
+  
     // Default return if no conditions met
     return null;
   }
@@ -77,9 +69,10 @@ class Score {
 export default function Index() {
   const insets = useSafeAreaInsets();
   const [score, setScore] = useState(new Score());
-  const handleCourtTap = (winner: string) => {
-    score.update(winner);
-    setScore(new Score(score.near, score.far, winner));
+  const handleCourtTap = (winner: "near" | "far") => {
+    const updatedScore = new Score(score.near, score.far);
+    updatedScore.update(winner);
+    setScore(updatedScore);
   };
 
   return (
