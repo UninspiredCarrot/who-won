@@ -1,6 +1,8 @@
-import { useState } from "react";
-import { Dimensions, Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import { useRef, useState } from "react";
+import { Dimensions, Text, View, StyleSheet, TouchableOpacity, PanResponder } from "react-native";
 import { SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import Svg, { Path } from 'react-native-svg';
+
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -23,9 +25,13 @@ class Point {
 class Score {
   far: Point;
   near: Point;
-  constructor(near = new Point(0, true), far = new Point(0, false)) {
+  nearScores: Point[];
+  farScores: Point[];
+  constructor(nearScores: Point[] = [], farScores: Point[] = [], near = new Point(0, true), far = new Point(0, false)) {
     this.near = near;
     this.far = far;
+    this.nearScores = nearScores;
+    this.farScores = farScores;
   }
 
   serverScore() {
@@ -39,6 +45,10 @@ class Score {
     winner.number += 1;
     winner.point = true;
     loser.point = false;
+
+    // if (this.setDone()){
+    //   this.nextSet();
+    // }
   }
 
   render(nearOrFar: "near" | "far", leftOrRight: "left" | "right") {
@@ -60,28 +70,70 @@ class Score {
         </Text>
       );
     }
-  
-    // Default return if no conditions met
+      return null;
+  }
+
+  setDone() {
+
     return null;
+  }
+
+  nextSet() {
+
   }
 }
 
 export default function Index() {
   const insets = useSafeAreaInsets();
   const [score, setScore] = useState(new Score());
-  const handleCourtTap = (winner: "near" | "far") => {
-    const updatedScore = new Score(score.near, score.far);
+  const increment = (winner: "near" | "far") => {
+    const updatedScore = new Score(score.nearScores, score.farScores, score.near, score.far);
     updatedScore.update(winner);
     setScore(updatedScore);
   };
 
+  const [path, setPath] = useState<Array<{ x: number; y: number }>>([]);
+  const pathRef = useRef('');
+
+
+
+  
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+
+      onPanResponderGrant: (e, gestureState) => {
+        // Reset the path when a new touch starts
+        
+        const { locationX, locationY } = e.nativeEvent;
+        pathRef.current = `M ${locationX} ${locationY}`;
+        // console.log(pathRef.current);
+        setPath([{ x: locationX, y: locationY }]);
+      },
+      onPanResponderMove: (e, gestureState) => {
+        // Capture the path as the user drags their finger
+        const { locationX, locationY } = e.nativeEvent;
+        pathRef.current += ` L ${locationX} ${locationY}`;
+        setPath((prevPath) => [...prevPath, { x: locationX, y: locationY }]);
+
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+
+        if (Math.abs(gestureState.dx) + Math.abs(gestureState.dy) === 0) {
+          gestureState.y0 < (insets.top + screenHeight*0.4) ? increment('far') : increment('near');
+        } else {
+          gestureState.moveY < (insets.top + screenHeight*0.4) ? increment('near') : increment('far');
+        }
+      },
+    })
+  ).current;
+
   return (
     <SafeAreaView style={styles.container}>
-    <TouchableOpacity style={[styles.farMidCourt, {top: insets.top + screenHeight * 0.9 * 0.5 * 0.3}]} onPress={() => handleCourtTap("far")}>
-    </TouchableOpacity>
-    <TouchableOpacity style={[styles.nearMidCourt, {bottom: insets.bottom + screenHeight * 0.9 * 0.5 * 0.3}]} onPress={() => handleCourtTap("near")}>
-    </TouchableOpacity>
-      {/* Whole court */}
+
+
+
       <View style={styles.leftCourt}>
         {/* Far court */}
         <View style={styles.halfCourt}>
@@ -109,6 +161,7 @@ export default function Index() {
 
         </View>
       </View>
+
       <View style={styles.rightCourt}>
         {/* Far court */}
         <View style={styles.halfCourt}>
@@ -131,6 +184,19 @@ export default function Index() {
           </View>
 
         </View>
+      </View> 
+
+      <View style={[styles.draw, {top: insets.top}]} {...panResponder.panHandlers}>
+        <Svg style={StyleSheet.absoluteFill}>
+          <Path
+            d={pathRef.current}
+            fill="none"
+            stroke="blue"
+            strokeWidth={4}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </Svg>
       </View>
 
 
@@ -143,12 +209,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#16262e',
     justifyContent: 'center',
-    alignItems: 'center',
+    // alignItems: 'center',
     flexDirection: 'row'
   },
   leftCourt: {
     width: screenWidth * 0.45,
-    height: screenHeight * 0.9,
+    height: screenHeight * 0.8,
     backgroundColor: '#3c7a89',
     borderWidth: 3,
     borderRightWidth: 0,
@@ -158,7 +224,7 @@ const styles = StyleSheet.create({
   },
   rightCourt: {
     width: screenWidth * 0.45,
-    height: screenHeight * 0.9,
+    height: screenHeight * 0.8,
     backgroundColor: '#3c7a89',
     borderWidth: 3,
     borderLeftWidth: 0,
@@ -171,14 +237,14 @@ const styles = StyleSheet.create({
   },
   front: {
     width: '100%',
-    height: screenHeight * 0.9 * 0.5 * 0.3,
+    height: screenHeight * 0.8 * 0.5 * 0.3,
     borderWidth: 3,
     borderColor: '#dbc2cf',
     backgroundColor: '#2E4756',
   },
   mid: {
     width: '100%',
-    height: screenHeight * 0.9 * 0.5 * 0.5,
+    height: screenHeight * 0.8 * 0.5 * 0.5,
     borderWidth: 3,
     borderColor: '#dbc2cf',
     backgroundColor: '#356170',
@@ -187,7 +253,7 @@ const styles = StyleSheet.create({
   },
   back: {
     width: '100%',
-    height: screenHeight * 0.9 * 0.5 * 0.2,
+    height: screenHeight * 0.8 * 0.5 * 0.2,
     borderWidth: 3,
     borderColor: '#dbc2cf',
 
@@ -200,16 +266,10 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 5,
   },
-  farMidCourt: {
+  draw: {
     position: "absolute",
     width: screenWidth*0.9,
-    height: screenHeight * 0.9 * 0.5 * 0.5,
-    zIndex: 3,
+    height: screenHeight * 0.8,
+    zIndex: 10
   },
-  nearMidCourt: {
-    position: "absolute",
-    width: screenWidth*0.9,
-    height: screenHeight * 0.9 * 0.5 * 0.5,
-    zIndex: 3,
-  }
 });
