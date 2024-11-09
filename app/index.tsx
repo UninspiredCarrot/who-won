@@ -27,24 +27,29 @@ class Score {
   near: Point;
   nearScores: Point[];
   farScores: Point[];
-  constructor(nearScores: Point[] = [], farScores: Point[] = [], near = new Point(0, true), far = new Point(0, false)) {
+  paths: string[];
+  constructor(nearScores: Point[] = [], farScores: Point[] = [], near = new Point(0, true), far = new Point(0, false), paths: string[] = []) {
     this.near = near;
     this.far = far;
     this.nearScores = nearScores;
     this.farScores = farScores;
+    this.paths = paths;
   }
 
   serverScore() {
     return this.near.point ? this.near.number : this.far.number;
   }
 
-  update(nearOrFar: "near" | "far") {
+  update(nearOrFar: "near" | "far", path: string) {
     const winner = nearOrFar === "near" ? this.near : this.far;
     const loser = nearOrFar === "near" ? this.far : this.near;
 
     winner.number += 1;
     winner.point = true;
     loser.point = false;
+    this.paths.push(path);
+    console.log(this.paths);
+
 
     // if (this.setDone()){
     //   this.nextSet();
@@ -84,16 +89,18 @@ class Score {
 }
 
 export default function Index() {
+  const [path, setPath] = useState<Array<{ x: number; y: number }>>([]);
+  const pathRef = useRef('');
+
   const insets = useSafeAreaInsets();
   const [score, setScore] = useState(new Score());
   const increment = (winner: "near" | "far") => {
-    const updatedScore = new Score(score.nearScores, score.farScores, score.near, score.far);
-    updatedScore.update(winner);
+    const updatedScore = new Score(score.nearScores, score.farScores, score.near, score.far, score.paths);
+    updatedScore.update(winner, pathRef.current);
     setScore(updatedScore);
   };
 
-  const [path, setPath] = useState<Array<{ x: number; y: number }>>([]);
-  const pathRef = useRef('');
+
 
 
 
