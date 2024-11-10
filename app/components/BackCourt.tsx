@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
         borderBottomWidth:1.5,
         borderColor: 'white',
         width: "100%",
-        height: `${(0.76*100)/(0.76+3.9+1.98)}%`,
+        height: `${(0.76*100)/(0.76+3.9+1.98)}%`, //6.64
     },
     flipped: {
         borderTopWidth:1.5,
