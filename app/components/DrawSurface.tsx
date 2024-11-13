@@ -3,12 +3,20 @@ import { View, StyleSheet, Dimensions, PanResponder } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path, Text as SvgText } from 'react-native-svg';
 import { Shot } from '../types/Shot';
+import { Match } from '../types/Match';
+import { Point } from '../types/Point';
+import { Player } from '../types/Player';
+import { Set } from '../types/Set';
 
-const DrawSurface: React.FC = () => {
+type DrawSurfaceProps = {
+    match: Match;
+}
+
+const DrawSurface: React.FC<DrawSurfaceProps> = ({ match }) => {
   const insets = useSafeAreaInsets();
   const [path, setPath] = useState('');
   const [shots, setShots] = useState([]);
-  const currentPathRef = useRef('');
+    const currentPathRef = useRef('');
 
   const screenHeight = Dimensions.get('window').height;
   const screenWidth = Dimensions.get('window').width;
@@ -35,8 +43,7 @@ const DrawSurface: React.FC = () => {
       const { locationX, locationY } = e.nativeEvent;
       currentPathRef.current = `M ${locationX} ${locationY}`;
       setPath(currentPathRef.current);
-      setShots([]);
-    },
+      setShots([]);    },
     onPanResponderMove: (e) => {
       const { locationX, locationY } = e.nativeEvent;
       currentPathRef.current += ` L ${locationX} ${locationY}`;
@@ -87,7 +94,7 @@ const DrawSurface: React.FC = () => {
             const currState = getState(curr);
 
             if (currState !== state) {
-                console.log(currState);
+                // console.log(currState);
                 
                 shots.push(curr);
                 state = currState;
@@ -107,11 +114,6 @@ const DrawSurface: React.FC = () => {
 
         }
 
-      
-
-      console.log(shots);
-
-
       let newPath = '';
 
         newPath = `M ${shots[0].x} ${shots[0].y}`;
@@ -119,10 +121,22 @@ const DrawSurface: React.FC = () => {
         newPath += ` L ${point.x} ${point.y} M ${point.x} ${point.y}`;
       });
 
-
-
       setPath(newPath);
       setShots(shots);
+
+      let winner: Player;
+
+      if (shots.length === 1) {
+        winner = getState(shots.at(-1)) == "near" ? match.player1 : match.player2;
+      } else {
+       winner = getState(shots.at(-1)) == "far" ? match.player1 : match.player2;
+      }
+
+    //   if match.sets[0].points.length !==.at(-1).winner
+
+    //   match.sets[0].points.push(new Point(, winner, shots));
+      console.log(match.sets[0].points);
+    //   const Point = new Point(server, )
     },
   });
 

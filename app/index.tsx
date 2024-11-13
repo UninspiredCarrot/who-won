@@ -3,12 +3,22 @@ import {StyleSheet, View} from 'react-native';
 import Court from './components/Court';
 import DrawSurface from './components/DrawSurface'
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Match } from './types/Match';
+import { Player } from './types/Player';
 
 const Index: React.FC = () => {
+
+  // Game logic
+  const player1 = new Player();
+  const player2 = new Player();
+  const match = new Match(player1, player2);
+
   return (
     <SafeAreaView style={styles.container}>
       <Court />
-      <DrawSurface />
+      <DrawSurface
+        match={match}
+      />
     </SafeAreaView>
   );
 };
