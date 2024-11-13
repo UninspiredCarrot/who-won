@@ -1,20 +1,18 @@
+import { Player } from './Player';
 import { Shot } from './Shot';
 
 export class Point {
-    serverId: number;
-    winnerId: number;
-    loserId: number;
+    server: Player;
+    winner: Player;
     path: Shot[];
 
     constructor (
-        serverId: number,
-        winnerId: number,
-        loserId: number,
+        server: Player,
+        winner: Player,
         path: Shot[]
     ) {
-        this.serverId = serverId;
-        this.winnerId = winnerId;
-        this.loserId = loserId;
+        this.server = server;
+        this.winner = winner;
         this.path = path;
     }
 }
