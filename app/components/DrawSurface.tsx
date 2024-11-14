@@ -1,22 +1,18 @@
 import React, { useRef, useState } from 'react';
 import { View, StyleSheet, Dimensions, PanResponder } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Path, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 import { Shot } from '../types/Shot';
-import { Match } from '../types/Match';
-import { Point } from '../types/Point';
-import { Player } from '../types/Player';
-import { Set } from '../types/Set';
+import { useMatch } from '../context/MatchContext';
+import { useSideContext } from '../context/SideContext';
 
-type DrawSurfaceProps = {
-    match: Match;
-}
-
-const DrawSurface: React.FC<DrawSurfaceProps> = ({ match }) => {
+const DrawSurface: React.FC = () => {
+  const { match, incrementScore } = useMatch();  // Use incrementScore here
+  const { nearPlayer, farPlayer, switchMapping } = useSideContext();
   const insets = useSafeAreaInsets();
   const [path, setPath] = useState('');
   const [shots, setShots] = useState([]);
-    const currentPathRef = useRef('');
+  const currentPathRef = useRef('');
 
   const screenHeight = Dimensions.get('window').height;
   const screenWidth = Dimensions.get('window').width;
@@ -43,7 +39,8 @@ const DrawSurface: React.FC<DrawSurfaceProps> = ({ match }) => {
       const { locationX, locationY } = e.nativeEvent;
       currentPathRef.current = `M ${locationX} ${locationY}`;
       setPath(currentPathRef.current);
-      setShots([]);    },
+      setShots([]);    
+    },
     onPanResponderMove: (e) => {
       const { locationX, locationY } = e.nativeEvent;
       currentPathRef.current += ` L ${locationX} ${locationY}`;
@@ -79,85 +76,78 @@ const DrawSurface: React.FC<DrawSurfaceProps> = ({ match }) => {
         }
       });
 
-
       const first = postSegments.shift();
 
       const shots: Shot[] = [new Shot(first.x, first.y)];
 
-      const getState = (shot: Shot) => { return shot.y > courtHeight/2 ? "near" : "far"};
+      const getState = (shot: Shot) => { return shot.y > courtHeight / 2 ? "near" : "far"};
       let state: "near" | "far" = getState(shots[0]);
 
-        let bound = Math.abs(first.y - courtHeight/2);
-        for (let i = 1; i < postSegments.length; i++) {
-            const curr = new Shot(postSegments[i].x, postSegments[i].y);
-            const dist = Math.abs(curr.y - courtHeight/2);
-            const currState = getState(curr);
+      let bound = Math.abs(first.y - courtHeight / 2);
+      for (let i = 1; i < postSegments.length; i++) {
+        const curr = new Shot(postSegments[i].x, postSegments[i].y);
+        const dist = Math.abs(curr.y - courtHeight / 2);
+        const currState = getState(curr);
 
-            if (currState !== state) {
-                // console.log(currState);
-                
-                shots.push(curr);
-                state = currState;
-                bound = dist;
-
-            } else if (dist > bound) {
-                bound = dist;
+        if (currState !== state) {
+            shots.push(curr);
+            state = currState;
+            bound = dist;
+        } else if (dist > bound) {
+            bound = dist;
+            shots.pop();
+            shots.push(curr);
+        } else if (dist === bound) {
+            if (shots[shots.length - 1].x === courtWidth / 2) {
                 shots.pop();
                 shots.push(curr);
-
-            } else if (dist === bound) {
-                if (shots[shots.length - 1].x === courtWidth/2) {
-                    shots.pop();
-                    shots.push(curr);
-                }
             }
-
         }
+      }
 
       let newPath = '';
-
-        newPath = `M ${shots[0].x} ${shots[0].y}`;
-        shots.slice(1).forEach(point => {
+      newPath = `M ${shots[0].x} ${shots[0].y}`;
+      shots.slice(1).forEach(point => {
         newPath += ` L ${point.x} ${point.y} M ${point.x} ${point.y}`;
       });
 
       setPath(newPath);
       setShots(shots);
 
-      let winner: Player;
-
       if (shots.length === 1) {
-        winner = getState(shots.at(-1)) == "near" ? match.player1 : match.player2;
+        if (getState(shots[0]) === 'near') {
+          incrementScore(nearPlayer, shots);
+        } else {
+          incrementScore(farPlayer, shots);
+        }
       } else {
-       winner = getState(shots.at(-1)) == "far" ? match.player1 : match.player2;
+        if (getState(shots.at(-1)) === 'far') {
+          incrementScore(nearPlayer, shots);
+        } else {
+          incrementScore(farPlayer, shots);
+        }
       }
 
-    //   if match.sets[0].points.length !==.at(-1).winner
-
-    //   match.sets[0].points.push(new Point(, winner, shots));
-      console.log(match.sets[0].points);
-    //   const Point = new Point(server, )
     },
   });
-
 
   return (
     <View
       style={[styles.drawSurface, { width: courtWidth, height: courtHeight, top: insets.top }]}
       {...panResponder.panHandlers}
     >
-        <Svg style={StyleSheet.absoluteFill}>
-          <Path d={path} fill="none" stroke="blue" strokeWidth={4} />
-          {shots.map((shot, index) => (
-            <Circle
-              key={index}
-              cx={shot.x}
-              cy={shot.y}
-              r={5} // Circle radius set from state
-              fill="red"
-            />
-          ))}
-        </Svg>
+      <Svg style={StyleSheet.absoluteFill}>
+        <Path d={path} fill="none" stroke="blue" strokeWidth={4} />
+        {shots.map((shot, index) => (
+          <Circle
+            key={index}
+            cx={shot.x}
+            cy={shot.y}
+            r={5} // Circle radius set from state
+            fill="red"
+          />
+        ))}
+      </Svg>
     </View>
   );
 };
