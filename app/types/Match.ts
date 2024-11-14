@@ -2,6 +2,7 @@ import { Player } from './Player';
 import { Set } from './Set';
 import { Shot } from './Shot';
 import { Rules } from './Rules';
+import { Score } from './Score';
 
 
 export class EndState {
@@ -79,7 +80,9 @@ export class Match {
     }
 
     getScore () {
-        return this.sets.map((set) => set.getPoints());
+        const score = new Score(this.player1, this.player2, this.sets);
+
+        return score;
     }
 
     checkDone() {

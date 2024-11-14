@@ -4,11 +4,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { Shot } from '../types/Shot';
 import { useMatch } from '../context/MatchContext';
-import { useSideContext } from '../context/SideContext'; // Import the SideContext
+import { useSideContext } from '../context/SideContext';
 
 const DrawSurface: React.FC = () => {
-  const match = useMatch();
-  const { nearPlayer, farPlayer, switchMapping } = useSideContext(); // Access near/far players from context
+  const { match, incrementScore } = useMatch();  // Use incrementScore here
+  const { nearPlayer, farPlayer, switchMapping } = useSideContext();
   const insets = useSafeAreaInsets();
   const [path, setPath] = useState('');
   const [shots, setShots] = useState([]);
@@ -116,19 +116,18 @@ const DrawSurface: React.FC = () => {
 
       if (shots.length === 1) {
         if (getState(shots[0]) === 'near') {
-          match.increment(nearPlayer, shots);
+          incrementScore(nearPlayer, shots);
         } else {
-          match.increment(farPlayer, shots);
+          incrementScore(farPlayer, shots);
         }
       } else {
         if (getState(shots.at(-1)) === 'far') {
-          match.increment(nearPlayer, shots);
+          incrementScore(nearPlayer, shots);
         } else {
-          match.increment(farPlayer, shots);
+          incrementScore(farPlayer, shots);
         }
       }
 
-      console.log(match.getScore());
     },
   });
 

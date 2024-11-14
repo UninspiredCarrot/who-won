@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useState, useMemo } from 'react';
-import { Match } from '../types/Match';
+import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
 import { Player } from '../types/Player';
 import { useMatch } from './MatchContext'; // Import Match context
 
@@ -16,7 +15,7 @@ interface SideProviderProps {
 }
 
 export const SideProvider: React.FC<SideProviderProps> = ({ children }) => {
-  const match = useMatch(); // Access the match from MatchContext
+  const { match } = useMatch(); // Access the match from MatchContext
   const [playersSwitched, setPlayersSwitched] = useState(false); // Track if players have been switched
 
   // Define the players for near and far sides based on the switch state
@@ -24,10 +23,10 @@ export const SideProvider: React.FC<SideProviderProps> = ({ children }) => {
   const farPlayer = useMemo(() => (playersSwitched ? match.player1 : match.player2), [match, playersSwitched]);
 
   // Function to switch the near/far mapping
-  const switchMapping = () => {
+  const switchMapping = useCallback(() => {
     setPlayersSwitched((prevState) => !prevState); // Toggle the state to switch the players
     console.log('Switching player sides');
-  };
+  }, []);
 
   return (
     <SideContext.Provider value={{ nearPlayer, farPlayer, switchMapping }}>

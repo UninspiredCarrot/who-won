@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet} from 'react-native';
 import Court from './components/Court';
 import DrawSurface from './components/DrawSurface'
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,8 +11,9 @@ const Index: React.FC = () => {
   return (
     <MatchProvider>
         <SafeAreaView style={styles.container}>
-          <Court />
-          <SideProvider>
+        <SideProvider>
+            <Court />
+          
             <DrawSurface />
           </SideProvider>
         </SafeAreaView>
