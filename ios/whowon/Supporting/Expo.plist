@@ -8,9 +8,9 @@
     <true/>
     <key>EXUpdatesLaunchWaitMs</key>
     <integer>0</integer>
-    <key>EXUpdatesSDKVersion</key>
-    <string>51.0.0</string>
     <key>EXUpdatesURL</key>
-    <string>https://exp.host/@boltboly/who-won</string>
+    <string>https://u.expo.dev/7ed132a5-6ce0-47b8-b36a-4b6b8f32b946</string>
+    <key>EXUpdatesRuntimeVersion</key>
+    <string>1.0.0</string>
   </dict>
 </plist>

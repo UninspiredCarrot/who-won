@@ -14,7 +14,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.boltboly.who-won"
+      "bundleIdentifier": "com.boltboly.who-won",
+      "jsEngine": "hermes"
     },
     "android": {
       "adaptiveIcon": {
@@ -36,8 +37,16 @@
     },
     "extra": {
       "eas": {
-        "projectId": "7ed132a5-6ce0-47b8-b36a-4b6b8f32b946"
+        "projectId": "454f10d3-c447-40b2-a809-e6d768a2e031"
+      },
+      "router": {
+        "origin": false
       }
-    }
+    },
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/7ed132a5-6ce0-47b8-b36a-4b6b8f32b946"
+    },
+    "owner": "whowon"
   }
 }
