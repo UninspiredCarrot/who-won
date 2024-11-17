@@ -1,30 +1,21 @@
 import React from 'react';
-import {StyleSheet} from 'react-native';
-import Court from './components/Court';
-import DrawSurface from './components/DrawSurface'
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { MatchProvider } from './context/MatchContext';
-import { SideProvider } from './context/SideContext';
+import { SafeAreaView, StyleSheet, View } from 'react-native';
+import AppBar from './components/AppBar';
+import StartMatch from './components/StartMatch';
 
 const Index: React.FC = () => {
-
   return (
-    <MatchProvider>
-        <SafeAreaView style={styles.container}>
-        <SideProvider>
-            <Court />
-          
-            <DrawSurface />
-          </SideProvider>
-        </SafeAreaView>
-    </MatchProvider>
+    <View style={styles.container}>
+      <StartMatch />
+      <AppBar />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
       flex: 1,
-      backgroundColor: '#6A7168',
+      backgroundColor: '#D9D9D9',
       alignItems: 'center',
       flexDirection: 'column'
   }
