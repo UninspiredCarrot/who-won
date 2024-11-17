@@ -1,4 +1,4 @@
-![alt-text]("who-won.png")
+![alt-text](who-won.png)
 
 ```mermaid
 graph TD;
