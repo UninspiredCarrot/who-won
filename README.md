@@ -9,4 +9,3 @@ graph TD;
     Box-->MidCourt;
     Box-->FrontCourt;
 ```
-![alt-text](IMG_81FED7272BD2-1.jpeg)
