@@ -3,21 +3,25 @@ import { View, StyleSheet, Dimensions, PanResponder } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { Shot } from '../types/Shot';
-import { useMatch } from '../context/MatchContext';
-import { useSideContext } from '../context/SideContext';
+import { incrementMatch } from '../features/match/matchSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../store/store';
 
 const DrawSurface: React.FC = () => {
-  const { match, incrementScore } = useMatch();  // Use incrementScore here
-  const { nearPlayer, farPlayer, switchMapping } = useSideContext();
   const insets = useSafeAreaInsets();
   const [path, setPath] = useState('');
   const [shots, setShots] = useState([]);
   const currentPathRef = useRef('');
-
+  const match = useSelector((state: RootState) => state.match.currentMatch);
   const screenHeight = Dimensions.get('window').height;
   const screenWidth = Dimensions.get('window').width;
-  const courtHeight = screenHeight * 0.9 - insets.top;
-  const courtWidth = (courtHeight / 13.4) * 6.1;
+  const courtHeight = screenHeight * 0.75 - insets.top;
+  const courtWidth = (courtHeight / 13) * 7;
+  const dispatch = useDispatch();
+
+  React.useEffect(() => {
+    console.log(match); // Global match state
+}, [match]);
 
   const calculateDistance = (point1: { x: number, y: number }, point2: { x: number, y: number }): number =>
     Math.sqrt((point2.x - point1.x) ** 2 + (point2.y - point1.y) ** 2);
@@ -114,17 +118,25 @@ const DrawSurface: React.FC = () => {
       setPath(newPath);
       setShots(shots);
 
+      const serializeShot = (shot: Shot) => ({
+        x: shot.x,
+        y: shot.y,
+      });
+      
+
+      const serializedShots = shots.map(serializeShot);
+
       if (shots.length === 1) {
         if (getState(shots[0]) === 'near') {
-          incrementScore(nearPlayer, shots);
+          dispatch(incrementMatch({winner: "team1", shots: serializedShots}));
         } else {
-          incrementScore(farPlayer, shots);
+          dispatch(incrementMatch({winner: "team2", shots: serializedShots}));
         }
       } else {
-        if (getState(shots.at(-1)) === 'far') {
-          incrementScore(nearPlayer, shots);
+        if (getState(shots.at(-1)!) === 'far') {
+          dispatch(incrementMatch({winner: "team1", shots: serializedShots}));
         } else {
-          incrementScore(farPlayer, shots);
+          dispatch(incrementMatch({winner: "team2", shots: serializedShots}));
         }
       }
 
@@ -133,7 +145,7 @@ const DrawSurface: React.FC = () => {
 
   return (
     <View
-      style={[styles.drawSurface, { width: courtWidth, height: courtHeight, top: insets.top }]}
+      style={[styles.drawSurface, { width: courtWidth, height: courtHeight }]}
       {...panResponder.panHandlers}
     >
       <Svg style={StyleSheet.absoluteFill}>
@@ -154,9 +166,12 @@ const DrawSurface: React.FC = () => {
 
 const styles = StyleSheet.create({
   drawSurface: {
-    position: 'absolute',
     backgroundColor: 'transparent',
     zIndex: 10,
+    position: 'absolute', 
+    bottom: 20, 
+    alignSelf: 'center',
+
   },
 });
 

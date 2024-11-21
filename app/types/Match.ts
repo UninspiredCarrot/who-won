@@ -43,6 +43,7 @@ export class Match {
 
     start () {
         this.state = "Playing";
+        console.log("Match started");
         this.sets = [new Set(this.player1, this.player2, this.rules)];
     }
 

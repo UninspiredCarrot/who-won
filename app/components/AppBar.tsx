@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { ClipPath, Defs, G, Path, Rect } from 'react-native-svg';
 
@@ -5,9 +6,10 @@ const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 
 const AppBar = () => {
+    const navigation = useNavigation();
   return (
     <View style={styles.appBar}>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Home')} >
             <Svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" fill="none">
                 <G clipPath="url(#clip0_9_95)">
                     <Path
